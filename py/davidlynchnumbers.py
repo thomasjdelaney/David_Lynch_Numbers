@@ -5,7 +5,7 @@ import datetime as dt
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats.stats as sss
-from typing import Optional, List
+from typing import Optional, List, Dict
 from scipy.stats import chisquare
 
 
@@ -15,7 +15,7 @@ class DavidLynchNumbers:
         """For initialising the object"""
         self.numbers = None
         self.load_numbers()
-        self.days_since_picked = {i: np.NaN for i in range(1, 11)}
+        self.days_since_picked: Dict[int, int] = {i: np.NaN for i in range(1, 11)}
         self.set_days_since_picked()
 
     def load_numbers(self, numbers: Optional[List[int]] = None) -> None:
@@ -66,6 +66,10 @@ class DavidLynchNumbers:
         observed_frequencies = np.bincount(self.numbers)[1:] / len(self.numbers)
         return chisquare(observed_frequencies)
 
+    def predict_longest_not_picked(self) -> int:
+        """For predicting the number that has not been picked for the longest time"""
+        return max(self.days_since_picked, key=self.days_since_picked.get)
+
 
 if __name__ == '__main__.py':
     david_lynch_numbers = DavidLynchNumbers()
@@ -73,3 +77,4 @@ if __name__ == '__main__.py':
     test_result = david_lynch_numbers.one_way_chi_squared_test()
     print("{0} INFO: Probability of David Lynch's numbers being drawn from a uniform distribution "
           "of integers 1 through 10: {1}".format(dt.datetime.now(), test_result.pvalue))
+
