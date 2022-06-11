@@ -4,9 +4,9 @@ import platform
 import datetime as dt
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.stats.stats as sss
 from typing import Optional, List, Dict
 from scipy.stats import chisquare
+from scipy.stats.stats import Power_divergenceResult
 
 
 class DavidLynchNumbers:
@@ -53,13 +53,19 @@ class DavidLynchNumbers:
             ax: Axes object"""
         if ax is None:
             fig, ax = plt.subplots(1, 1)
-        ax.hist(self.numbers, bins=np.arange(11) + 0.5)
-        ax.set_xlim(0.5, 10.5)
+        unique_numbers, counts = np.unique(self.numbers, return_counts=True)
+        proportions = counts / len(self.numbers)
+        ax.bar(unique_numbers, proportions)
+        ax.hlines(
+            y=0.1, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='red', label='Expected')
         ax.set_xlabel('Number')
-        ax.set_ylabel('Times picked')
-        ax.grid(True)
+        ax.set_ylabel('Proportion of picks')
+        ax.set_xlim(0.1, 10.9)
+        ax.set_xticks(unique_numbers)
+        ax.legend()
+        ax.grid(visible=True, alpha=0.2)
 
-    def one_way_chi_squared_test(self) -> sss.Power_divergenceResult:
+    def one_way_chi_squared_test(self) -> Power_divergenceResult:
         """For performing a one way chi squared test on the numbers
         Returns:
             the result of the chi-squared test."""
