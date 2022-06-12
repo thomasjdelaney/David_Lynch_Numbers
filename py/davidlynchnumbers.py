@@ -11,12 +11,16 @@ from scipy.stats.stats import Power_divergenceResult
 
 class DavidLynchNumbers:
 
-    def __init__(self) -> None:
-        """For initialising the object"""
-        self.numbers = None
-        self.load_numbers()
+    def __init__(self, numbers: Optional[List[int]] = None) -> None:
+        """For initialising the object
+        Args:
+            numbers: We can initialise the object with given numbers."""
+        self.numbers: List[int] = numbers
+        self.load_numbers(numbers)
         self.days_since_picked: Dict[int, int] = {i: np.NaN for i in range(1, 11)}
         self.set_days_since_picked()
+        self.times_picked = {i+1: c for i, c in enumerate(np.bincount(self.numbers).tolist()[1:])}
+        self.proportion_picked = {n: tp / len(self.numbers) for n, tp in self.times_picked.items()}
 
     def load_numbers(self, numbers: Optional[List[int]] = None) -> None:
         """For loading the numbers.
@@ -36,8 +40,6 @@ class DavidLynchNumbers:
                     numbers.append(10)
                 else:
                     numbers.append(n)
-            self.numbers = numbers
-        else:
             self.numbers = numbers
 
     def set_days_since_picked(self) -> None:
@@ -72,9 +74,32 @@ class DavidLynchNumbers:
         observed_frequencies = np.bincount(self.numbers)[1:] / len(self.numbers)
         return chisquare(observed_frequencies)
 
+    @staticmethod
+    def predict_random_uniform() -> int:
+        return np.random.randint(1, 11)
+
     def predict_longest_not_picked(self) -> int:
         """For predicting the number that has not been picked for the longest time"""
         return max(self.days_since_picked, key=self.days_since_picked.get)
+
+    def predict_least_often_picked(self) -> int:
+        """For predicting the number that has been picked least often"""
+        return min(self.times_picked, key=self.times_picked.get)
+
+    def predict_naive(self) -> int:
+        """For predicting the number according a multinomial with naive proportions as the parameters."""
+        rng = np.random.default_rng()
+        multinomial_params = list(self.proportion_picked.values())
+        draw_result = rng.multinomial(n=1, pvals=multinomial_params)
+        return np.flatnonzero(draw_result)[0] + 1
+
+    def predict_inverted_naive(self):
+        """For predicting from a multinomial with parameters equal to the difference between the naive parameter and
+        the analytical parameter. p = analytical + (analytical - naive)."""
+        rng = np.random.default_rng()
+        multinomial_params = 0.2 - np.array(list(self.proportion_picked.values()))
+        draw_result = rng.multinomial(n=1, pvals=multinomial_params)
+        return np.flatnonzero(draw_result)[0] + 1
 
 
 if __name__ == '__main__.py':
