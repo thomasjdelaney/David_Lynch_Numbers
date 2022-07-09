@@ -102,10 +102,9 @@ class DavidLynchNumbers:
         return np.flatnonzero(draw_result)[0] + 1
 
 
-if __name__ == '__main__.py':
+if __name__ == '__main__':
     david_lynch_numbers = DavidLynchNumbers()
     david_lynch_numbers.plot_number_counts()
     test_result = david_lynch_numbers.one_way_chi_squared_test()
     print("{0} INFO: Probability of David Lynch's numbers being drawn from a uniform distribution "
           "of integers 1 through 10: {1}".format(dt.datetime.now(), test_result.pvalue))
-

@@ -38,4 +38,4 @@ class DavidLynchPredictor:
 
 
 dlp = DavidLynchPredictor(starting_pick=400)
-a = dlp.test_random_predictions()
+a = dlp.test_uniform_predictions()

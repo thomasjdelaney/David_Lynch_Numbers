@@ -1,6 +1,20 @@
+import json
+import requests
 import datetime as dt
-from typing import Optional
 from youtube_search import YoutubeSearch
+from typing import Optional
+
+
+def find_value(html: str, key: str, num_sep_chars: int = 2, separator: str = '"'):
+    """For getting the value for the given key from the given html request.
+    Arguments:
+        html: the request text
+        key: the key for which we want the value
+        num_sep_chars: number of characters in the separating string
+        separator: the character"""
+    start_pos = html.find(key) + len(key) + num_sep_chars
+    end_pos = html.find(separator, start_pos)
+    return html[start_pos:end_pos]
 
 
 class DavidLynchNumberScraper:
@@ -25,6 +39,15 @@ class DavidLynchNumberScraper:
             title = result['title']
             print(f"{title}: {url}")
             self.most_recent_url = url
+
+    def get_comments(self):
+        session = requests.Session()
+        res = session.get(self.most_recent_url)
+        xsrf_token = find_value(res.text, "XSRF_TOKEN", num_sep_chars=3)
+        # parse the YouTube initial data in the <script> tag
+        data_str = find_value(res.text, 'window["ytInitialData"] = ', num_sep_chars=0, separator="\n").rstrip(";")
+        # convert to Python dictionary instead of plain text string
+        data = json.loads(data_str)
 
 
 if __name__ == '__main__':
